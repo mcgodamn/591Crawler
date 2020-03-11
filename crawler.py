@@ -6,8 +6,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import UnexpectedAlertPresentException
 from selenium.webdriver.chrome.options import Options
 import time
-from bs4 import BeautifulSoup
-import threading
 import queue
 from enum import IntEnum
 
@@ -23,15 +21,11 @@ class ResultType(IntEnum):
     TIMEOUT = 4
 
 # 取得網頁內容
-
-
 def getContent(link, examPath, waitTime = 1):
     global driver
     try:
         options = Options()
-        # options.headless = True
-        # driver = webdriver.Chrome(
-        #     executable_path="/Users/McGodamn/Documents/Cases/crawler/chromedriver",options=options)
+        options.headless = True
         driver = webdriver.Chrome(
             executable_path="chromedriver.exe", chrome_options=options)
         result = ResultType.DEFFAUT

@@ -10,7 +10,6 @@ orderType: desc 升序, asc 降序
 other: cook 可開伙, balcony_1 有陽台, lift 電梯,cartplace 車位,pet 寵物,tragoods 近捷運, lease 短租
 
 mrtcoods: 
-
 文湖線
 "4257" 南港展覽館
 "4314" 南港軟體園
