@@ -8,17 +8,41 @@ from selenium.webdriver.chrome.options import Options
 import time
 import queue
 from enum import IntEnum
+import json
 
 Datas = []
 Urls = queue.Queue()
 
+URL_HEAD = "https://rent.591.com.tw/?"
+
+def pathBuilder(parameters):
+    def getMutiplePara(paras):
+        res = ""
+        for p in paras:
+            res += (str(p)+',')
+        return res
+
+    m_url = URL_HEAD
+    for para in parameters:
+        print(para)
+        print(type(parameters[para]))
+        m_url += (
+            '&'+ str(para) + '=' +
+            (getMutiplePara(parameters[para]) if (
+                type(parameters[para]) == list) else str(parameters[para]))
+        )
+    return m_url
+
+j = json.loads(
+    '{"kind" : 1, "rentprice" : [6000,7000]}')
+
+print(pathBuilder(j))
 
 class ResultType(IntEnum):
     DEFFAUT = 0
     SUCCESS = 1
     FAIL = 2
-    NOT_FOR_SALE = 3
-    TIMEOUT = 4
+    TIMEOUT = 3
 
 # 取得網頁內容
 def getContent(link, examPath, waitTime = 1):
@@ -135,6 +159,3 @@ def Main():
     if pause:
         print("pause program completly")
     writeXls()
-
-Main()
-input("finished")

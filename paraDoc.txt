@@ -1,3 +1,5 @@
+https://rent.591.com.tw/?kind=0&sex=3&order=posttime&orderType=desc&region=3&section=26,43,37&rentprice=6000,7500&option=broadband&not_cover=1
+
 kind: 0 不限, 1 整層住家, 2 獨立套房, 3 分租套房,4 雅房, 8 車位, 
 sex: 1 男,2 女,3 不限
 not_cover: 1 排除頂加
