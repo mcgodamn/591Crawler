@@ -8,14 +8,26 @@ from selenium.webdriver.chrome.options import Options
 import time
 import queue
 from enum import IntEnum
+import database
 import json
-
-Datas = []
-Urls = queue.Queue()
 
 URL_HEAD = "https://rent.591.com.tw/?"
 
-def pathBuilder(parameters):
+
+class ResultType(IntEnum):
+    DEFFAUT = 0
+    SUCCESS = 1
+    FAIL = 2
+    TIMEOUT = 3
+
+
+Datas = []
+
+def output():
+    global Datas
+    database.Save2DB(Datas)
+
+def PathBuilder(parameters):
     def getMutiplePara(paras):
         res = ""
         for p in paras:
@@ -24,43 +36,55 @@ def pathBuilder(parameters):
 
     m_url = URL_HEAD
     for para in parameters:
-        print(para)
-        print(type(parameters[para]))
         m_url += (
-            '&'+ str(para) + '=' +
+            '&' + str(para) + '=' +
             (getMutiplePara(parameters[para]) if (
                 type(parameters[para]) == list) else str(parameters[para]))
         )
     return m_url
 
-j = json.loads(
-    '{"kind" : 1, "rentprice" : [6000,7000]}')
 
-print(pathBuilder(j))
+def ProcessParameter(_para):
+    DUPLICATE_CATAGORIES = ["kind", "sex", "mrtcoods", ]
+    ADDON_CATAGORIES = ["kind", "mrtcoods"]
+    def getAddonData():
+        res = {}
+        for cata in ADDON_CATAGORIES:
+            res[cata] = _para[cata]
+        return res
 
-class ResultType(IntEnum):
-    DEFFAUT = 0
-    SUCCESS = 1
-    FAIL = 2
-    TIMEOUT = 3
+    result = []
+    for cata in DUPLICATE_CATAGORIES:
+        if type(_para[cata]) == list:
+            for value in _para[cata]:
+                newPara = _para.copy()
+                newPara[cata] = value
+                result += ProcessParameter(newPara)
+            return result
+    return [{'url': PathBuilder(_para), 'addon': getAddonData()}]
+
 
 # 取得網頁內容
-def getContent(link, examPath, waitTime = 1):
+def getContent(link, examPath, waitTime=1):
     global driver
     try:
         options = Options()
         options.headless = True
         driver = webdriver.Chrome(
-            executable_path="chromedriver.exe", chrome_options=options)
+            executable_path="chromedriver.exe", options=options)
         result = ResultType.DEFFAUT
         driver.get(link)
 
         while driver.execute_script("return document.readyState") != 'complete':
             time.sleep(0.5)
 
+        loading = driver.find_element_by_id("j_loading")
         WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.XPATH, examPath))
+            (lambda d:
+                EC.presence_of_element_located(
+                    (By.XPATH, examPath))(d) and loading.value_of_css_property("display") == 'none')
         )
+
         return ResultType.SUCCESS
     except Exception as e:
         print(e)
@@ -75,87 +99,66 @@ def getContent(link, examPath, waitTime = 1):
         else:
             return ResultType.FAIL
 
-def writeXls():
-    global Datas
-    print("Start outpuing xls")
-    f = xlwt.Workbook()
-    sheet = f.add_sheet(u'sheet1', cell_overwrite_ok=True)
-    for i in range(len(Datas)):
-        sheet.write(i, 0, Datas[i]['url'])
-        sheet.write(i, 1, Datas[i]['price'] if 'price' in Datas[i] else '')
 
-    f.save('output.xls')
+def goods(data, re=False):
+    def AnalysisRoom(ele):
+        result = {}
+        roomEl = ele.find_element_by_class_name("infoContent")
+        result['price'] = float(ele.find_element_by_class_name(
+            "price").find_element_by_tag_name("i").text.replace(',', ''))
 
-def ReadXls():
-    global Urls
-    try:
-        workbook = xlrd.open_workbook("source.xls")
-        sheet = workbook.sheet_by_index(0)
-        for row in range(sheet.nrows):
-            data = sheet.cell(row, 0).value
-            dataSet = dict()
-            dataSet['url'] = data
-            Urls.put(dataSet)
+        result['dist'] = float(roomEl.find_element_by_class_name(
+            "nearby").text.split()[2][:-1])
 
-    except Exception as e:
-        print(e)
-        print("Can't read Xls. Please check file again.")
+        titleAndUrl = roomEl.find_element_by_tag_name(
+            "h3").find_element_by_tag_name("a")
+        result['title'] = titleAndUrl.text
+        result['url'] = titleAndUrl.get_attribute('href')
 
-def goods(dataSet, re=False):
-    global myDoc, Datas
-    try:
-        link = dataSet['url']
-        result = getContent(link, "//ul[@class=\"price\"]")
-        if result != ResultType.SUCCESS:
-            if result == ResultType.NOT_FOR_SALE:
-                dataSet['price'] = "Not sold"
-            elif result == ResultType.TIMEOUT:
-                dataSet['price'] = "Time out"
-            elif result == ResultType.FAIL:
-                dataSet['price'] = "Not available"
+        allArea = roomEl.find_element_by_class_name(
+            "lightBox").text
+        areaPos = allArea.find('坪')
+        result['area'] = float(allArea[:areaPos].split('  |  ')[-1])
+
+        return result if (result['dist'] <= 500) else None
+
+    global Datas, driver
+    # try:
+    canWeGoNextPage = True
+    result = getContent(data['url'], "//div[@id=\"container\"]")
+    el = driver.find_element_by_xpath("//div[@id=\"container\"]")
+    els = el.find_elements_by_xpath("//ul[@class=\"listInfo clearfix \"]")
+    for room in els:
+        res = AnalysisRoom(room)
+        if res != None:
+            res.update(data['addon'])
+            Datas.append(res)
         else:
-            dataSet['price'] = driver.find_element_by_xpath(
-                "//ul[@class=\"price\"]//strong[@class=\"price01\"]//b").text
-        print(dataSet['price'])
-        Datas.append(dataSet)
-        driver.quit()
+            canWeGoNextPage = False
+            break
+    driver.quit()
 
-    except (TypeError, AttributeError) as t:
-        print(t)
-        driver.quit()
-        goods(dataSet, True)
-    except Exception as e:
-        print(e)
-        Datas.append(dataSet)
-        driver.quit()
+    # TODO handle next page
 
+    # except (TypeError, AttributeError) as te:
+    #     print(te)
+    #     driver.quit()
+    #     goods(data, True)
+    # except Exception as e:
+    #     print(e)
+    #     driver.quit()
 
-# 主要進入點
-# 讀json檔裡的大類別URL，存到陣列裡
-# 再由URL陣列裡取得小類別URL，
-# 再由小類別URL取得商品頁面，並取得商品資訊
-
-# 程式主要是維護這些陣列，查詢過的就pop掉
 
 def Main():
-    global Urls, start, pause
-    if start:
-        return
-    if not pause:
-        ReadXls()
-        print("start crawler")
-    else:
-        print("restart crawler")
-    start = True
-    pause = False
-    # 取得商品資訊
-    while Urls.qsize() != 0:
-        if pause:
-            break
-        url = Urls.get()
-        print("Getting " + (str)
-              (url['url'] + " 's Item information."))
-        goods(url)
-    if pause:
-        print("pause program completly")
-    writeXls()
+
+    # j = json.loads(
+    #     '{"kind" : [2,3], "sex": [1,3], "not_cover":1, "rentprice" : [6000,20000], "mrtcoods": [4180, 4179],"order":"nearby", "orderType":"desc"}')
+    j = json.loads(
+        '{"kind" : [2], "sex": [1], "not_cover":1, "rentprice" : [6000,20000], "mrtcoods": [4180],"order":"nearby", "orderType":"desc"}')
+
+    for data in ProcessParameter(j):
+        goods(data)
+
+    output()
+
+Main()

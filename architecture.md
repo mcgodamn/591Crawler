@@ -12,6 +12,7 @@ crawler - python
 
 - save result to db
 
-db - TBD
+db - json file, simple as fuck
 
+- a python bridge which update the client, do the IO thang
 - sort results
