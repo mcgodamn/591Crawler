@@ -1,18 +1,20 @@
 # Architecture
 
-front - HTML
+- front - HTML, js
 
-- download dependence files
-- run crawler
-- show seetings
-- show logs
-- show results from db
+  - show seetings
+  - show logs
+  - process data
+  - show results
 
-crawler - python
+- backend - nodejs
 
-- save result to db
+  - run crawler
 
-db - json file, simple as fuck
+- crawler - python
 
-- a python bridge which update the client, do the IO thang
-- sort results
+- db - json file, simple as fuck
+
+  - a python bridge which update the client, do the IO thang
+  - sort results
+  - blacklist

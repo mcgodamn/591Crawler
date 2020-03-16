@@ -1,31 +1,33 @@
-// var express = require("express")
-// var app = express()
-// var http = require('http')
-// app.use(express.static("./public"))
-// app.get('/', function (req, res) {
-//     res.sendFile(__dirname + '/index.html');
-// })
+var express = require("express")
+var app = express()
+var http = require('http')
+app.use(express.static(__dirname + '/public'));
+app.get('/', function (req, res) {
+    res.sendFile(__dirname + '/public/frontend/index.html');
+})
+var bodyParser = require('body-parser');
+var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
+var crawleRequest
+var pythonSocket
 
-// var server = http.createServer(app).listen(3000)
-// var server_socket = require('socket.io')(server)
+app.post('/command', urlencodedParser, function (req, res) {
+    if (!req.body) return res.sendStatus(400)
+    console.log(req.body);
+    if (req.body.event == "StartCrawler") {
+        console.log("lets start crawler");
+        crawleRequest = res
+        pythonSocket.emit("start", "it's my args.")
+    }
+})
 
-// server_socket.on('connection', function (socket) {
-//     socket.on('python-message', function (data) {
-//         socket.broadcast.emit('message', data)
-//     })
-// })
+var server = http.createServer(app).listen(3000)
+var server_socket = require('socket.io')(server)
 
-var express = require("express");
-var app = express();
-var http = require("http");
-app.use(express.static("./public")); // where the web page code goes
-var http_server = http.createServer(app).listen(3000);
-var http_io = require("socket.io")(http_server);
+server_socket.on('connection', function (socket) {
+    socket.on('finish', function (data) {
+        crawleRequest.send(data)
+    })
 
-http_io.on("connection", function (httpsocket) {
-    httpsocket.on('python-message', function (fromPython) {
-        console.log(fromPython)
-        httpsocket.broadcast.emit('node_response', fromPython);
-    });
-});
+    pythonSocket = socket
+})
