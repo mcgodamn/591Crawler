@@ -41,11 +41,17 @@
     <div id="app">
         <div class="container">
             <button v-on:click="StartCrawler" type="button" class="btn btn-primary">Start Crawler</button>
+            <table class="table">
+                <thead>
+                    <tr v-html="getHeaderHtml()"></tr>
+                </thead>
+                <tbody v-html="getDataHtml()"></tbody>
+            </table>
         </div>
     </div>
 
     <!-- self-define -->
-    <!-- minified -->
     <script type="module" src="frontend/Scripts/main.js"></script>
+    <!-- minified -->
 </body>
 </html>
