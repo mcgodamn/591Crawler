@@ -72,6 +72,7 @@ class Crawler():
 
     def __init__(self):
         self.Data = []
+        self.driver = None
 
     def setDatabase(self, _db):
         self.database = _db
@@ -140,7 +141,7 @@ class Crawler():
             return result if (result['dist'] <= 500) else None
         # try:
         canWeGoNextPage = True
-        result = getContent(data['url'], "//div[@id=\"content\"]")
+        result = self.getContent(data['url'], "//div[@id=\"content\"]")
         el = self.driver.find_element_by_xpath("//div[@id=\"content\"]")
         if el.value_of_css_property("display") == 'none':
             self.driver.quit()
@@ -169,7 +170,12 @@ class Crawler():
         #     self.driver.quit()
 
     def Start(self, _parameters):
+        print(_parameters)
         # for data in ProcessParameter(json.loads(_parameters)):
-        #     self.goods(data)
-
+        for data in ProcessParameter(_parameters):
+            self.goods(data)
         self.output()
+
+# c = Crawler()
+# c.Start({'kind': [2, 3], 'sex': [1, 3], 'not_cover': 1, 'rentprice': [6000, 8000], 'mrtcoods': [
+#         4232, 4231, 4184], 'order': 'nearby', 'orderType': 'desc', 'option': ['broadband'], 'hasimg': 1, 'area': [6]})

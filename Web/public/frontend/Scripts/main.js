@@ -1,3 +1,10 @@
+var socket = io('http://localhost:3000');
+socket.on('connect', function () {
+    socket.emit('whoamI',"client")
+});
+socket.on('crawler_result', function (data) {
+    handleData(data)
+});
 
 var vm = new Vue({
     el: '#app',
@@ -24,17 +31,14 @@ var vm = new Vue({
     methods: {
         StartCrawler() {
             if (this.state.isCrawling) return
-
-            this.$http.post('command',
-                {
-                    event:"StartCrawler"
-                },
-                { emulateJSON: true }).then(function (res) {
-                    handleData(res.body)
-                }, function (res) {
-                    console.log(res.status)
-                    console.log(res.body)
-                })
+            socket.emit("command",
+                {type:"start_crawler", args: {
+                    kind: [2, 3], sex: [1, 3], not_cover: 1, rentprice: [6000, 8000], mrtcoods: [4232, 4231, 4184], order: "nearby", orderType: "desc", option: ["broadband"], hasimg: 1, area: [6]
+                }},
+                function(){
+                    console.log("start now yo")
+                }
+            )
         },
         getHeaderHtml() {
             var str = `<th scope="col">#</th>`
