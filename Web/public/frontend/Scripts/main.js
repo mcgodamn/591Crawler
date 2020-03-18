@@ -33,7 +33,9 @@ var vm = new Vue({
             if (this.state.isCrawling) return
             socket.emit("command",
                 {type:"start_crawler", args: {
-                    kind: [2, 3], sex: [1, 3], not_cover: 1, rentprice: [6000, 8000], mrtcoods: [4232, 4231, 4184], order: "nearby", orderType: "desc", option: ["broadband"], hasimg: 1, area: [6]
+                    kind: [2, 3], sex: [1, 3], not_cover: 1, rentprice: [5000, 7000], mrtcoods: [4232, 4231, 4184, 4200, 4182, 4183, 4181, 4180, 4179, 4178, 4177, 4176, 4175, 4174, 4173, 4233, 66265, 66264,
+                        4271, 4242, 4272, 4273],
+                        order: "nearby", orderType: "desc", option: ["broadband", "cold", "icebox", "wardrobe","bed"], hasimg: 1, area: [6]
                 }},
                 function(){
                     console.log("start now yo")

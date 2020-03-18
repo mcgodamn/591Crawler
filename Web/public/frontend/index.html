@@ -13,20 +13,22 @@
     <meta name="author" content="McGodamn">
     <link rel="shortcut icon" href="#" />
 
+    <!-- font awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" rel="stylesheet">
     <!-- google font -->
     <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC&display=swap" rel="stylesheet">
     <!-- bootstrap -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
-        </script>
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
         integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
-        </script>
+    </script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
-        </script>
+    </script>
 
     <!-- vue development version -->
     <script src="https://unpkg.com/vue"></script>
@@ -36,6 +38,11 @@
     <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
     <!-- socket.io -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    <link rel="stylesheet" href="frontend/CSS/style.css">
+    <!-- self-define -->
+    <script type="module" src="frontend/Scripts/main.js"></script>
+    <!-- <script type="module" src="./Scripts/main.js"></script> -->
+    <!-- minified -->
     <title>真·591租屋搜尋器</title>
 </head>
 
@@ -45,133 +52,167 @@
             <div class="container pr-5 pl-5 pt-5">
                 <form>
                     <div class="form-group row text-center">
-                        <label class="col-2 col-form-label text-right">租金</label>
-                        <input type="text" class="form-control col-2 ml-3" placeholder="下限">
-                        <label class="pl-2 pr-2">~</label>
-                        <input type="text" class="form-control col-2" placeholder="上限">
-                    </div>
-
-                    <div class="form-group row text-center">
-                        <label class="col-2 col-form-label text-right">坪數</label>
-                        <input type="text" class="form-control col-2 ml-3" placeholder="下限">
-                        <label class="pl-2 pr-2">~</label>
-                        <input type="text" class="form-control col-2" placeholder="上限">
-                    </div>
-
-                    <div class="form-group row text-center">
-                        <label class="col-2 col-form-label text-right">類型</label>
-                        <div class="col text-left align-self-center">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
-                                <label class="form-check-label" for="inlineCheckbox1">雅房</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
-                                <label class="form-check-label" for="inlineCheckbox2">獨立套房</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">分租套房</label>
+                        <div class="col container">
+                            <h3 class="row text-right pl-1 accordion-toggle" data-toggle="collapse"
+                                href="#collapseMoney" role="button" aria-expanded="false" aria-controls="collapseMoney">
+                                租金</h3>
+                            <div class="row collapse show" id="collapseMoney">
+                                <input type="text" class="form-control col col-lg-3" placeholder="下限"
+                                    v-model="money_lower_bound">
+                                <label class="pl-2 pr-2">~</label>
+                                <input type="text" class="form-control col col-lg-3" placeholder="上限"
+                                    v-model="money_upper_bound">
                             </div>
                         </div>
                     </div>
 
                     <div class="form-group row text-center">
-                        <label class="col-2 col-form-label text-right">性別</label>
-                        <div class="col text-left align-self-center">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
-                                <label class="form-check-label" for="inlineCheckbox1">男</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
-                                <label class="form-check-label" for="inlineCheckbox2">女</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">不限</label>
+                        <div class="col container">
+                            <h3 class="row text-right pl-1 accordion-toggle" data-toggle="collapse" href="#collapseArea"
+                                role="button" aria-expanded="false" aria-controls="collapseArea">
+                                坪數</h3>
+                            <div class="row collapse show" id="collapseArea">
+                                <input type="text" class="form-control col col-lg-3" placeholder="下限"
+                                    v-model="area_lower_bound">
+                                <label class="pl-2 pr-2">~</label>
+                                <input type="text" class="form-control col col-lg-3" placeholder="上限"
+                                    v-model="area_upper_bound">
                             </div>
                         </div>
                     </div>
 
                     <div class="form-group row text-center">
-                        <label class="col-2 col-form-label text-right">選項</label>
-                        <div class="col text-left align-self-center">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
-                                <label class="form-check-label" for="inlineCheckbox1">網路</label>
+                        <div class="col container">
+                            <h3 class="row text-right pl-1 accordion-toggle" data-toggle="collapse" href="#collapseType"
+                                role="button" aria-expanded="false" aria-controls="collapseType">
+                                類型</h3>
+                            <div class="row collapse show" id="collapseType">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="share" v-model="isShare">
+                                    <label class="form-check-label" for="share">雅房</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="suite" v-model="isSuite">
+                                    <label class="form-check-label" for="suite">獨立套房</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="share_suite"
+                                        v-model="isShare_suite">
+                                    <label class="form-check-label" for="share_suite">分租套房</label>
+                                </div>
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
-                                <label class="form-check-label" for="inlineCheckbox2">電視</label>
+                        </div>
+                    </div>
+                    <div class="form-group row text-center">
+                        <div class="col container">
+                            <h3 class="row text-right pl-1 accordion-toggle" data-toggle="collapse" href="#collapseSex"
+                                role="button" aria-expanded="false" aria-controls="collapseSex">
+                                性別</h3>
+                            <div class="row collapse show" id="collapseSex">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="sex_man" v-model="isMan">
+                                    <label class="form-check-label" for="sex_man">男</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="sex_woman" v-model="isWoman">
+                                    <label class="form-check-label" for="sex_woman">女</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="sex_none" v-model="isNoneSex">
+                                    <label class="form-check-label" for="sex_none">不限</label>
+                                </div>
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">冰箱</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">沙發</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">衣櫃</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">床</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">洗衣機</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">第四台</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">熱水器</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">天然氣</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">可開伙</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">有陽台</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">電梯</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">車位</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">寵物</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">近捷運</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">短租</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">有房屋圖片</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                                <label class="form-check-label" for="inlineCheckbox3">排除頂加</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group row text-center">
+                        <div class="col container">
+                            <h3 class="row text-right pl-1 accordion-toggle" data-toggle="collapse"
+                                href="#collapseOption" role="button" aria-expanded="false"
+                                aria-controls="collapseOption">
+                                選項</h3>
+                            <div class="row collapse show" id="collapseOption">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_broadband"
+                                        v-model="is_broadband">
+                                    <label class="form-check-label" for="option_broadband">網路</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_tv" v-model="is_tv">
+                                    <label class="form-check-label" for="option_tv">電視</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_cold" v-model="is_cold">
+                                    <label class="form-check-label" for="option_cold">冷氣</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_icebox" v-model="is_icebox">
+                                    <label class="form-check-label" for="option_icebox">冰箱</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_sofa" v-model="is_sofa">
+                                    <label class="form-check-label" for="option_sofa">沙發</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_wardrobe" v-model="is_wardrobe">
+                                    <label class="form-check-label" for="option_wardrobe">衣櫃</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_bed" v-model="is_bed">
+                                    <label class="form-check-label" for="option_bed">床</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_washer" v-model="is_washer">
+                                    <label class="form-check-label" for="option_washer">洗衣機</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_four" v-model="is_four">
+                                    <label class="form-check-label" for="option_four">第四台</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_hotwater" v-model="is_hotwater">
+                                    <label class="form-check-label" for="option_hotwater">熱水器</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_naturalgas" v-model="is_naturalgas">
+                                    <label class="form-check-label" for="option_naturalgas">天然氣</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_cook" v-model="is_cook">
+                                    <label class="form-check-label" for="option_cook">可開伙</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_balcony_1" v-model="is_balcony_1">
+                                    <label class="form-check-label" for="option_balcony_1">有陽台</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_lift" v-model="is_lift">
+                                    <label class="form-check-label" for="option_lift">電梯</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_cartplace" v-model="is_cartplace">
+                                    <label class="form-check-label" for="option_cartplace">車位</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_pet" v-model="is_pet">
+                                    <label class="form-check-label" for="option_pet">寵物</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_tragoods" v-model="is_tragoods">
+                                    <label class="form-check-label" for="option_tragoods">近捷運</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_lease" v-model="is_lease">
+                                    <label class="form-check-label" for="option_lease">短租</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_hasimg" v-model="is_hasimg">
+                                    <label class="form-check-label" for="option_hasimg">有房屋圖片</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="option_not_cover" v-model="is_not_cover">
+                                    <label class="form-check-label" for="option_not_cover">排除頂加</label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -936,10 +977,6 @@
             </table>
         </div>
     </div>
-
-    <!-- self-define -->
-    <script type="module" src="frontend/Scripts/main.js"></script>
-    <!-- minified -->
 </body>
 
 </html>

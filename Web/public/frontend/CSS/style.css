@@ -1,0 +1,13 @@
+.accordion-toggle:after {
+    font-family: 'Font Awesome 5 Free';
+    content: " \f107";
+    float: right;
+    font-weight: 900;
+    white-space: pre;
+}
+
+.accordion-toggle.collapsed:after {
+    content: " \f106";
+    font-weight: 900;
+    white-space: pre;
+}

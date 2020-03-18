@@ -93,6 +93,7 @@ class Crawler():
                 executable_path="chromedriver.exe", options=options)
             result = ResultType.DEFFAUT
             self.driver.get(link)
+            print("getting: " + link)
 
             while self.driver.execute_script("return document.readyState") != 'complete':
                 time.sleep(0.5)
@@ -174,6 +175,7 @@ class Crawler():
         # for data in ProcessParameter(json.loads(_parameters)):
         for data in ProcessParameter(_parameters):
             self.goods(data)
+        print("crawler finished")
         self.output()
 
 # c = Crawler()
