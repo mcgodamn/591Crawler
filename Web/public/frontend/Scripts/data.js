@@ -53,6 +53,8 @@ export const PARAMETERS = [
             pet: { text: "寵物", value: "pet" },
             tragoods: { text: "近捷運", value: "tragoods" },
             lease: { text: "短租", value: "lease" },
+            hasimg: { text: "有房屋照片", value: "hasimg" },
+            not_cover: { text: "排除頂加", value: "not_cover" },
         }
     },
     {
