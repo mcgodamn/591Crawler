@@ -3,13 +3,7 @@ import {
     PARAMETERS
 } from './data.js'
 
-var socket = io('http://localhost:3000');
-socket.on('connect', function () {
-    socket.emit('whoamI',"client")
-});
-socket.on('crawler_result', function (data) {
-    handleData(data)
-});
+startSocket()
 
 var vm = new Vue({
     el: '#app',
@@ -42,14 +36,21 @@ var vm = new Vue({
             return html
         },
         StartCrawler() {
+            var parameters = getParameters()
+            console.log(parameters)
+
             if (this.state.isCrawling) return
             socket.emit("command",
-                {type:"start_crawler", args: {
-                    kind: [2, 3], sex: [1, 3], not_cover: 1, rentprice: [5000, 7000], mrtcoods: [4232, 4231, 4184, 4200, 4182, 4183, 4181, 4180, 4179, 4178, 4177, 4176, 4175, 4174, 4173, 4233, 66265, 66264,
-                        4271, 4242, 4272, 4273],
-                        order: "nearby", orderType: "desc", option: ["broadband", "cold", "icebox", "wardrobe","bed"], hasimg: 1, area: [6]
-                }},
-                function(){
+                {
+                    type: "start_crawler", args:
+                        // {
+                        //     kind: [2, 3], sex: [1, 3], not_cover: 1, rentprice: [5000, 7000], mrtcoods: [4232, 4231, 4184, 4200, 4182, 4183, 4181, 4180, 4179, 4178, 4177, 4176, 4175, 4174, 4173, 4233, 66265, 66264,
+                        //         4271, 4242, 4272, 4273],
+                        //         order: "nearby", orderType: "desc", option: ["broadband", "cold", "icebox", "wardrobe","bed"], hasimg: 1, area: [6]
+                        // }
+                        parameters
+                },
+                function () {
                     console.log("start now yo")
                 }
             )
@@ -64,8 +65,7 @@ var vm = new Vue({
         getTableDataHtml() {
             var html = ""
             var i = 1
-            for (var res in this.crawl_result)
-            {
+            for (var res in this.crawl_result) {
                 var str = `<th scope="row">${i++}</th>`
                 var data = this.crawl_result[res]
                 for (var d in data) {
@@ -78,16 +78,13 @@ var vm = new Vue({
     },
 });
 
-function handleData(data)
-{
+function handleData(data) {
     console.log(data)
-    if (data.length == 0) {return}
+    if (data.length == 0) { return }
     var result = data[0]
     var head = []
-    for (var first_key in result)
-    {
-        for (var key in result[first_key])
-        {
+    for (var first_key in result) {
+        for (var key in result[first_key]) {
             head.push(key)
         }
         break
@@ -96,11 +93,9 @@ function handleData(data)
     vm.crawl_result = result
 }
 
-function getDataHtml(_para)
-{
+function getDataHtml(_para) {
     var res = ""
-    switch (_para.type)
-    {
+    switch (_para.type) {
         case TYPE.OPTIONS:
             res = getOptionHtml(_para)
             break
@@ -119,17 +114,29 @@ function getDataHtml(_para)
     return res
 }
 
-function getOptionHtml(_para){
+var socket
+function startSocket() {
+    socket = io('http://localhost:3000');
+    socket.on('connect', function () {
+        socket.emit('whoamI', "client")
+    });
+    socket.on('crawler_result', function (data) {
+        handleData(data)
+    });
+}
+
+function getOptionHtml(_para) {
     var res = `<div class="form-group row text-center">
                     <div class="col">
                         <h3 class="row text-right pl-1 accordion-toggle" data-toggle="collapse" href="#collapse_${_para.name}"
                             role="button" aria-expanded="false" aria-controls="collapse_${_para.name}">${_para.text}</h3>
                         <div class="row collapse show" id="collapse_${_para.name}">`
-    for (var key in _para.data){
+    for (var key in _para.data) {
         var data = _para.data[key]
-        res +=`<div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="${key}" v-model="${key} value=${data.value}">
-                    <label class="form-check-label" for="${key}">${data.text}</label>
+        var id = `${_para.type} ${_para.name} ${data.value}`
+        res += `<div class="form-check form-check-inline">
+                    <input class="form-check-input options" type="checkbox" id="${id}">
+                    <label class="form-check-label" for="${id}">${data.text}</label>
                 </div>`
     }
     res += `</div>
@@ -137,7 +144,9 @@ function getOptionHtml(_para){
     </div>`
     return res
 }
+
 function getRangeHtml(_para) {
+    var id = `${_para.type} ${_para.name}`
     return `
     <div class="form-group row text-center">
     <div class="col">
@@ -145,32 +154,33 @@ function getRangeHtml(_para) {
             href="#collapse_${_para.name}" role="button" aria-expanded="false" aria-controls="collapse_${_para.name}">
             ${_para.text}</h3>
         <div class="row collapse show" id="collapse_${_para.name}">
-            <input type="text" class="form-control col col-lg-3" placeholder="下限"
-                v-model="${_para.name}_lower_bound">
+            <input type="text" class="form-control col col-lg-3 options" placeholder="下限"
+                id="${id} lower_bound">
+                
             <label class="pl-2 pr-2">~</label>
-            <input type="text" class="form-control col col-lg-3" placeholder="上限"
-                v-model="${_para.name}_upper_bound">
+            <input type="text" class="form-control col col-lg-3 options" placeholder="上限"
+                id="${id} upper_bound">
         </div>
     </div>
     </div>
     `
 }
 function get2LevelOptionHtml(_para) {
-    function getInnerOption(_data){
-        var res =  `<div class="form-group row text-center">
+    function getInnerOption(_data) {
+        var res = `<div class="form-group row text-center">
                         <label class="col-2 pl-0 pr-0 col-form-label text-center">${_data.text}</label>
                         <div class="col text-left align-self-center">`
         for (var key in _data.items) {
             var item = _data.items[key]
+            var id = `${_para.type} ${_para.name} ${item.value}`
             res += `<div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="${_para.name}_${item.value}"
-                            value="${item.value}" v-model="${_para.name}">
-                        <label class="form-check-label" for="${_para.name}_${item.value}">${item.text}</label>
+                        <input class="form-check-input options" type="checkbox" id="${id}">
+                        <label class="form-check-label" for="${id}">${item.text}</label>
                     </div>`
         }
         res += `</div>
             </div>`
-        
+
         return res
     }
 
@@ -184,7 +194,7 @@ function get2LevelOptionHtml(_para) {
                 <form>
     `
 
-    for (var key in _para.data){
+    for (var key in _para.data) {
         res += getInnerOption(_para.data[key])
     }
 
@@ -192,5 +202,48 @@ function get2LevelOptionHtml(_para) {
         </div>
     </div>
     </div>`
+    return res
+}
+
+
+
+function getParameters() {
+    function getOptionParamter(data, obj) {
+        if (!$(obj).is(':checked')) { return }
+
+        if (!(data[1] in res)) { res[data[1]] = [] }
+        if (!(res[data[1]].includes(data[2]))) { res[data[1]].push(data[2]) }
+    }
+    function getRangeParamter(data, obj) {
+        if (!(data[1] in res)) { res[data[1]] = [] }
+        var text = $(obj).val()
+        switch (data[2]) {
+            case "lower_bound":
+                if (text == "") { text = "0" }
+                res[data[1]].unshift(text);
+                break
+            case "upper_bound":
+                if (text != "") {
+                    res[data[1]].push(text);
+                }
+                break
+        }
+    }
+
+    var res = {}
+
+    $(".options").each(function () {
+        var split = this.id.split(" ")
+        switch (Number(split[0])) {
+            case TYPE.OPTIONS:
+            case TYPE.TWO_LEVEL_OPTIONS:
+                getOptionParamter(split, this)
+                break
+            case TYPE.RANGE:
+                getRangeParamter(split, this)
+                break
+        }
+    });
+
     return res
 }
