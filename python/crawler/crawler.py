@@ -42,30 +42,48 @@ def PathBuilder(parameters):
 def ProcessParameter(_para, _shareProperty=None):
     DUPLICATE_CATAGORIES = ["kind", "sex", "mrtcoods", ]
     ADDON_CATAGORIES = ["kind", "mrtcoods", "option"]
+    EXTRA_OPTIONS = ["hasimg", "not_cover", "role"]
+
+    para = _para
 
     def getShareProperty():
         res = {
             "time": datetime.strftime(datetime.now(), '%Y-%m-%d-%H:%M:%S')
         }
+        return res
 
     def getAddonData():
         res = {}
         for cata in ADDON_CATAGORIES:
             if cata in res:
-                res[cata] = _para[cata]
+                res[cata] = para[cata]
         return res
+
+    def splitExtraOptions():
+        for extra in EXTRA_OPTIONS:
+            if extra in para["option"]:
+                para[extra] = 1
+                para["option"].remove(extra)
+    
+    def addStaticInfo():
+        para["order"] = "nearby"
+        para["orderType"] = "desc"
 
     shareProperty = _shareProperty if _shareProperty != None else getShareProperty()
 
+    addStaticInfo()
+    splitExtraOptions()
+
     result = []
+
     for cata in DUPLICATE_CATAGORIES:
-        if type(_para[cata]) == list:
-            for value in _para[cata]:
-                newPara = _para.copy()
+        if type(para[cata]) == list:
+            for value in para[cata]:
+                newPara = para.copy()
                 newPara[cata] = value
                 result += ProcessParameter(newPara)
             return result
-    return [{'url': PathBuilder(_para), 'addon': getAddonData()}]
+    return [{'url': PathBuilder(para), 'addon': getAddonData()}]
 
 
 class Crawler():
