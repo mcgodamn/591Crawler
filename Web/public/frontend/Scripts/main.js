@@ -8,19 +8,35 @@ startSocket()
 var vm = new Vue({
     el: '#app',
     data: {
+        modalShow:false,
+        progressAll:1,
+        progress:0,
         state: {
             _isCrawling: false,
             get isCrawling() {
                 return this._isCrawling
             },
             set isCrawling(crawling) {
+                this._isCrawling = crawling
+                vm.modalShow = false
+
                 if (crawling) {
-                    vm.logState = LogType.LOGGING
+                    vm.progressAll = 1
+                    vm.progress = 0
+                    $('#ProgressModal').modal({
+                        show: true,
+                        keyboard: false,
+                        backdrop: 'static'
+                    })
+
+                    //debug
+                    vm.modalShow = true
+                    vm.progressAll = 7
+                    vm.progress = 3
                 }
                 else {
-                    vm.logState = LogType.NOT_LOGIN
+                    $('#ProgressModal').modal('hide')
                 }
-                this._isCrawling = crawling
             }
         },
         crawl_result: {
@@ -38,22 +54,18 @@ var vm = new Vue({
         StartCrawler() {
             var parameters = getParameters()
             console.log(parameters)
-
             if (this.state.isCrawling) return
+            this.state.isCrawling = true
             socket.emit("command",
                 {
-                    type: "start_crawler", args:
-                        // {
-                        //     kind: [2, 3], sex: [1, 3], not_cover: 1, rentprice: [5000, 7000], mrtcoods: [4232, 4231, 4184, 4200, 4182, 4183, 4181, 4180, 4179, 4178, 4177, 4176, 4175, 4174, 4173, 4233, 66265, 66264,
-                        //         4271, 4242, 4272, 4273],
-                        //         order: "nearby", orderType: "desc", option: ["broadband", "cold", "icebox", "wardrobe","bed"], hasimg: 1, area: [6]
-                        // }
-                        parameters
+                    type: "start_crawler", args:parameters
                 },
                 function () {
                     console.log("start now yo")
                 }
             )
+        },
+        CancelCrawler() {
         },
         getTableHeaderHtml() {
             var str = `<th scope="col">#</th>`
@@ -120,7 +132,16 @@ function startSocket() {
     socket.on('connect', function () {
         socket.emit('whoamI', "client")
     });
+    socket.on('crawler_progress', function (data) {
+        vm.modalShow = true
+        if (data.progressAll === undefined) {
+            vm.progress = data.progress
+        } else {
+            vm.progressAll = data.progressAll
+        }
+    });
     socket.on('crawler_result', function (data) {
+        vm.state.isCrawling = false
         handleData(data)
     });
 }

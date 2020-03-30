@@ -37,6 +37,8 @@ function SetClientSocket(socket)
             case 'start_crawler':
                 crawlerSocket.emit("command", { type: data.type, args: data.args})
                 break
+            case 'cancel_crawler':
+                break
         }
         callback()
     })
@@ -48,5 +50,8 @@ function SetCrawlerSocket(socket)
     crawlerSocket = socket
     socket.on('finish', function (data) {
         clientSocket.emit("crawler_result",data)
+    })
+    socket.on('progress', function (data) {
+        clientSocket.emit("crawler_progress", data)
     })
 }

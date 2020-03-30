@@ -66,6 +66,31 @@
                 <tbody v-html="getTableDataHtml()"></tbody>
             </table>
         </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="ProgressModal" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content" v-show="modalShow">
+                    <div class="modal-header">
+                        <h4 class="modal-title">正在駭入591獲取資料...</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar"
+                                :style="{ width: (Math.round(progress/progressAll*100)) + '%' }"
+                                :aria-valuenow="Math.round(progress/progressAll*100)"
+                                aria-valuemin="0" aria-valuemax="100">
+                                {{ progress + '/' + progressAll }}
+                                </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button v-on:click="CancelCrawler" type="button" class="btn btn-danger">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 
