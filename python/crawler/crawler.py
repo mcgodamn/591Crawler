@@ -21,76 +21,12 @@ class ResultType(IntEnum):
     FAIL = 2
     TIMEOUT = 3
 
-
-def PathBuilder(parameters):
-    def getMutiplePara(paras):
-        res = ""
-        for p in paras:
-            res += (str(p)+',')
-        return res
-
-    m_url = URL_HEAD
-    for para in parameters:
-        m_url += (
-            '&' + str(para) + '=' +
-            (getMutiplePara(parameters[para]) if (
-                type(parameters[para]) == list) else str(parameters[para]))
-        )
-    return m_url
-
-
-def ProcessParameter(_para, _shareProperty=None):
-    DUPLICATE_CATAGORIES = ["kind", "sex", "mrtcoods", ]
-    ADDON_CATAGORIES = ["kind", "mrtcoods", "option"]
-    EXTRA_OPTIONS = ["hasimg", "not_cover", "role"]
-
-    para = _para
-
-    def getShareProperty():
-        res = {
-            "time": datetime.strftime(datetime.now(), '%Y-%m-%d-%H:%M:%S')
-        }
-        return res
-
-    def getAddonData():
-        res = {}
-        for cata in ADDON_CATAGORIES:
-            if cata in res:
-                res[cata] = para[cata]
-        return res
-
-    def splitExtraOptions():
-        for extra in EXTRA_OPTIONS:
-            if extra in para["option"]:
-                para[extra] = 1
-                para["option"].remove(extra)
-    
-    def addStaticInfo():
-        para["order"] = "nearby"
-        para["orderType"] = "desc"
-
-    shareProperty = _shareProperty if _shareProperty != None else getShareProperty()
-
-    addStaticInfo()
-    splitExtraOptions()
-
-    result = []
-
-    for cata in DUPLICATE_CATAGORIES:
-        if type(para[cata]) == list:
-            for value in para[cata]:
-                newPara = para.copy()
-                newPara[cata] = value
-                result += ProcessParameter(newPara)
-            return result
-    return [{'url': PathBuilder(para), 'addon': getAddonData()}]
-
-
 class Crawler():
 
     def __init__(self):
         self.Data = []
         self.driver = None
+        self.distance = [0,0]
 
     def setDatabase(self, _db):
         self.database = _db
@@ -101,6 +37,80 @@ class Crawler():
     def output(self):
         self.database.Save2DB(self.Data)
         self.eventDelegate("finish", self.database.getData())
+    
+    def ProcessParameter(self, _para, _shareProperty=None):
+        DUPLICATE_CATAGORIES = ["kind", "sex", "mrtcoods", ]
+        ADDON_CATAGORIES = ["kind", "mrtcoods", "option"]
+        EXTRA_OPTIONS = ["hasimg", "not_cover", "role"]
+        SELF_DEFINED = ["distance"]
+
+        para = _para
+
+        def PathBuilder(parameters):
+            def getMutiplePara(paras):
+                res = ""
+                for p in paras:
+                    res += (str(p)+',')
+                return res
+
+            m_url = URL_HEAD
+            for para in parameters:
+                m_url += (
+                    '&' + str(para) + '=' +
+                    (getMutiplePara(parameters[para]) if (
+                        type(parameters[para]) == list) else str(parameters[para]))
+                )
+            return m_url
+
+        def getShareProperty():
+            res = {
+                "time": datetime.strftime(datetime.now(), '%Y-%m-%d-%H:%M:%S')
+            }
+            return res
+
+        def getAddonData():
+            res = {}
+            for cata in ADDON_CATAGORIES:
+                if cata in res:
+                    res[cata] = para[cata]
+            return res
+
+        def handleSelfDefinePara():
+            for selfDefine in SELF_DEFINED:
+                if selfDefine in para:
+                    if selfDefine == "distance":
+                        self.distance = para[selfDefine]
+                        del para[selfDefine]
+
+        def splitExtraOptions():
+            if "option" not in para:
+                return
+            for extra in EXTRA_OPTIONS:
+                if extra in para["option"]:
+                    para[extra] = 1
+                    para["option"].remove(extra)
+
+        def addStaticInfo():
+            para["order"] = "nearby"
+            para["orderType"] = "desc"
+
+        shareProperty = _shareProperty if _shareProperty != None else getShareProperty()
+
+        handleSelfDefinePara()
+        addStaticInfo()
+        splitExtraOptions()
+
+        result = []
+
+        for cata in DUPLICATE_CATAGORIES:
+            if type(para[cata]) == list:
+                for value in para[cata]:
+                    newPara = para.copy()
+                    newPara[cata] = value
+                    result += self.ProcessParameter(newPara)
+                return result
+        return [{'url': PathBuilder(para), 'addon': getAddonData()}]
+
 
     # 取得網頁內容
     def getContent(self, link, examPath, waitTime=1):
@@ -143,7 +153,9 @@ class Crawler():
             roomEl = ele.find_element_by_class_name("infoContent")
             result['price'] = float(ele.find_element_by_class_name(
                 "price").find_element_by_tag_name("i").text.replace(',', ''))
-
+            print(roomEl.find_element_by_class_name("nearby").text)
+            print(float(roomEl.find_element_by_class_name(
+                "nearby").text.split()[2][:-1]))
             result['dist'] = float(roomEl.find_element_by_class_name(
                 "nearby").text.split()[2][:-1])
 
@@ -157,7 +169,14 @@ class Crawler():
             areaPos = allArea.find('坪')
             result['area'] = float(allArea[:areaPos].split('  |  ')[-1])
 
-            return result if (result['dist'] <= 500) else None
+            minDis = 0 if (self.distance[0] == "") else float(self.distance[0])
+            maxDis = float('inf') if (
+                self.distance[1] == "") else float(self.distance[1])
+
+            print(minDis)
+            print(maxDis)
+
+            return result if (result['dist'] <= maxDis) and (minDis <= result['dist']) else None
         # try:
         canWeGoNextPage = True
         result = self.getContent(data['url'], "//div[@id=\"content\"]")
@@ -190,9 +209,11 @@ class Crawler():
 
     def Start(self, _parameters):
         print(_parameters)
-        # for data in ProcessParameter(json.loads(_parameters)):
-        for data in ProcessParameter(_parameters):
-            self.goods(data)
+        datas = self.ProcessParameter(_parameters)
+        self.eventDelegate("progress", {'progressAll':len(datas)})
+        for i in range(len(datas)):
+            self.goods(datas[i])
+            self.eventDelegate("progress", {'progress': i+1})
         print("crawler finished")
         self.output()
 

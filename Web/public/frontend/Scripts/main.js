@@ -9,8 +9,23 @@ var vm = new Vue({
     el: '#app',
     data: {
         modalShow:false,
-        progressAll:1,
-        progress:0,
+        progress: {
+            _all:1,
+            _now:0,
+            get all() {
+                return this._all
+            },
+            set all(value) {
+                this._all = value
+            },
+            get now() {
+                return this._now
+            },
+            set now(value) {
+                this._now = value
+                updateProgressCircle((value/this._all) * 100)
+            }
+        },
         state: {
             _isCrawling: false,
             get isCrawling() {
@@ -21,18 +36,13 @@ var vm = new Vue({
                 vm.modalShow = false
 
                 if (crawling) {
-                    vm.progressAll = 1
-                    vm.progress = 0
+                    vm.progress.all = 1
+                    vm.progress.now = 0
                     $('#ProgressModal').modal({
                         show: true,
                         keyboard: false,
                         backdrop: 'static'
                     })
-
-                    //debug
-                    vm.modalShow = true
-                    vm.progressAll = 7
-                    vm.progress = 3
                 }
                 else {
                     $('#ProgressModal').modal('hide')
@@ -81,7 +91,11 @@ var vm = new Vue({
                 var str = `<th scope="row">${i++}</th>`
                 var data = this.crawl_result[res]
                 for (var d in data) {
-                    str += (`<td>${data[d]}</td>`)
+                    str += (`<td>${
+                        ((d == "url") ? "<a href=\"" + data[d] + "\">" : "")
+                        + data[d] +
+                        ((d == "url") ? "</a>" : "")
+                    }</td>`)
                 }
                 html += `<tr>${str}</tr>`
             }
@@ -134,10 +148,11 @@ function startSocket() {
     });
     socket.on('crawler_progress', function (data) {
         vm.modalShow = true
-        if (data.progressAll === undefined) {
-            vm.progress = data.progress
+        var res = data[0]
+        if (res.progressAll === undefined) {
+            vm.progress.now = res.progress
         } else {
-            vm.progressAll = data.progressAll
+            vm.progress.all = res.progressAll
         }
     });
     socket.on('crawler_result', function (data) {
@@ -226,9 +241,36 @@ function get2LevelOptionHtml(_para) {
     return res
 }
 
-
-
 function getParameters() {
+    function addDefault(_res) {
+        for (var p in PARAMETERS) {
+            var para = PARAMETERS[p]
+            if (("default" in para) && !(para.name in _res)) {
+                var defaultValue
+                if (para.default.length != 0) {
+                    defaultValue = Object.assign([], para.default)
+                } else {
+                    defaultValue = []
+                    if (para.type == TYPE.TWO_LEVEL_OPTIONS) {
+                        for (var data in para.data) {
+                            for (var item in para.data[data].items) {
+                                defaultValue.push(para.data[data].items[item].value)
+                            }
+                        }
+                    } else if (para.type == TYPE.OPTIONS) {
+                        for (var data in para.data) {
+                            defaultValue.push(para.data[data].value)
+                        }
+                    } else if (para.type == TYPE.RANGE) {
+                        defaultValue = ["",""]
+                    }
+                }
+                _res[para.name] = defaultValue
+            }
+        }
+        return _res  
+    }
+
     function getOptionParamter(data, obj) {
         if (!$(obj).is(':checked')) { return }
 
@@ -236,23 +278,24 @@ function getParameters() {
         if (!(res[data[1]].includes(data[2]))) { res[data[1]].push(data[2]) }
     }
     function getRangeParamter(data, obj) {
-        if (!(data[1] in res)) { res[data[1]] = [] }
         var text = $(obj).val()
+        if (text == "") {return}
+
+        if (!(data[1] in res)) { res[data[1]] = ["", ""] }
         switch (data[2]) {
             case "lower_bound":
-                if (text == "") { text = "0" }
-                res[data[1]].unshift(text);
+                res[data[1]][0] = text
                 break
             case "upper_bound":
-                if (text != "") {
-                    res[data[1]].push(text);
+                res[data[1]][1] = text
+                if (res[data[1]][1] == "") {
+                    res[data[1]][1] = "0"
                 }
                 break
         }
     }
 
     var res = {}
-
     $(".options").each(function () {
         var split = this.id.split(" ")
         switch (Number(split[0])) {
@@ -266,5 +309,26 @@ function getParameters() {
         }
     });
 
-    return res
+    return addDefault(res)
+}
+
+function updateProgressCircle(value) {
+    $(".progress").each(function () {
+
+        var left = $(this).find('.progress-left .progress-bar');
+        var right = $(this).find('.progress-right .progress-bar');
+
+        if (value > 0) {
+            if (value <= 50) {
+                right.css('transform', 'rotate(' + percentageToDegrees(value) + 'deg)')
+            } else {
+                right.css('transform', 'rotate(180deg)')
+                left.css('transform', 'rotate(' + percentageToDegrees(value - 50) + 'deg)')
+            }
+        }
+    })
+}
+
+function percentageToDegrees(percentage) {
+    return percentage / 100 * 360
 }

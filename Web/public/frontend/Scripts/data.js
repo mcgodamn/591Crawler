@@ -16,7 +16,8 @@ export const PARAMETERS = [
             suite_share: { text: "分租套房", value: 3 },
             share: { text: "雅房", value: 4 },
             car: { text: "車位", value: 8 }
-        }
+        },
+        default: [0],
     },
     {
         name: "sex",
@@ -26,9 +27,11 @@ export const PARAMETERS = [
             man: { text: "男", value: 1 },
             woman: { text: "女", value: 2 },
             no_limit: { text: "不限", value: 3 }
-        }
+        },
+        default: [1,2,3],
     },
-    {name: "area", type: TYPE.RANGE, text: "坪數" },
+    { name: "distance", type: TYPE.RANGE, text: "離捷運站距離", default: [0, 500]},
+    {name: "area", type: TYPE.RANGE, text: "坪數"},
     { name: "rentprice", type: TYPE.RANGE, text: "租金" },
     {
         name: "option",
@@ -244,6 +247,7 @@ export const PARAMETERS = [
                     { value: "66355", text: "崁頂" },
                 ]
             }
-        ]
+        ],
+        default: [],
     }
 ]
