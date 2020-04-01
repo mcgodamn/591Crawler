@@ -8,6 +8,8 @@ startSocket()
 var vm = new Vue({
     el: '#app',
     data: {
+        optionShow: true,
+        resultShow: false,
         modalShow:false,
         progress: {
             _all:1,
@@ -165,7 +167,7 @@ function getOptionHtml(_para) {
     var res = `<div class="form-group row text-center">
                     <div class="col">
                         <h3 class="row text-right pl-1 accordion-toggle" data-toggle="collapse" href="#collapse_${_para.name}"
-                            role="button" aria-expanded="false" aria-controls="collapse_${_para.name}">${_para.text}</h3>
+                            role="button" aria-expanded="false" aria-controls="collapse_${_para.name}"><b>${_para.text}</b></h3>
                         <div class="row collapse show" id="collapse_${_para.name}">`
     for (var key in _para.data) {
         var data = _para.data[key]
@@ -187,8 +189,8 @@ function getRangeHtml(_para) {
     <div class="form-group row text-center">
     <div class="col">
         <h3 class="row text-right pl-1 accordion-toggle" data-toggle="collapse"
-            href="#collapse_${_para.name}" role="button" aria-expanded="false" aria-controls="collapse_${_para.name}">
-            ${_para.text}</h3>
+            href="#collapse_${_para.name}" role="button" aria-expanded="false" aria-controls="collapse_${_para.name}"><b>
+            ${_para.text}</b></h3>
         <div class="row collapse show" id="collapse_${_para.name}">
             <input type="text" class="form-control col col-lg-3 options" placeholder="下限"
                 id="${id} lower_bound">
@@ -204,7 +206,7 @@ function getRangeHtml(_para) {
 function get2LevelOptionHtml(_para) {
     function getInnerOption(_data) {
         var res = `<div class="form-group row text-center">
-                        <label class="col-2 pl-0 pr-0 col-form-label text-center">${_data.text}</label>
+                        <label class="col-2 pl-0 pr-0 col-form-label text-center"><b>${_data.text}</b></label>
                         <div class="col text-left align-self-center">`
         for (var key in _data.items) {
             var item = _data.items[key]
@@ -225,7 +227,7 @@ function get2LevelOptionHtml(_para) {
         <div class="col">
             <h3 class="row text-right pl-1 accordion-toggle" data-toggle="collapse" href="#collapse_${_para.name}"
                 role="button" aria-expanded="false" aria-controls="collapse_${_para.name}">
-                ${_para.text}</h3>
+                <b>${_para.text}</b></h3>
             <div class="collapse show" id="collapse_${_para.name}">
                 <form>
     `

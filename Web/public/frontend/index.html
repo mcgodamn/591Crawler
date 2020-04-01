@@ -42,22 +42,29 @@
 
 <body>
     <div id="app">
-        <div class="container">
+        <div class="option-background" v-show="optionShow">
             <div class="container pr-5 pl-5 pt-5">
-                <form v-html="getOptionPageHtml()"></form>
-            </div>
-            <div class="row text-center mt-1 pb-2">
-                <div class="col">
-                    <button v-on:click="StartCrawler" type="button" class="btn btn-primary">搜尋</button>
+                <h1><b>591租屋搜尋器</b></h1>
+                <div class="row">
+                    <form class="pt-3 col" v-html="getOptionPageHtml()"></form>
+                </div>
+                <div class="row text-center mt-1 pb-4">
+                    <div class="col">
+                        <button v-on:click="StartCrawler" type="button" class="btn btn-primary">搜尋</button>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <table class="table">
-                <thead>
-                    <tr v-html="getTableHeaderHtml()"></tr>
-                </thead>
-                <tbody v-html="getTableDataHtml()"></tbody>
-            </table>
+        <div class="result-background" v-show="resultShow">
+            <div class="container">
+                <table class="table">
+                    <thead>
+                        <tr v-html="getTableHeaderHtml()"></tr>
+                    </thead>
+                    <tbody v-html="getTableDataHtml()"></tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Modal -->
@@ -91,5 +98,4 @@
         </div>
     </div>
 </body>
-
 </html>
