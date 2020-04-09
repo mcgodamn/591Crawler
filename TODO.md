@@ -10,3 +10,11 @@
 ## Extra
 
 - 進度環動畫
+
+## Build
+
+- python - `pyinstaller.exe -F .\main.py --add-binary '.\chromedriver.exe;.'`
+
+- nodejs - `pkg . -t node10-win-x64`
+
+  

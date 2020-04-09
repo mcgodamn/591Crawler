@@ -11,6 +11,7 @@ import queue
 from enum import IntEnum
 import json
 import sys
+import os
 
 URL_HEAD = "https://rent.591.com.tw/?"
 
@@ -114,11 +115,16 @@ class Crawler():
 
     # 取得網頁內容
     def getContent(self, link, examPath, waitTime=1):
+        def resource_path(relative_path):
+            if hasattr(sys, '_MEIPASS'):
+                return os.path.join(sys._MEIPASS, relative_path)
+            return os.path.join(os.path.abspath("."), relative_path)
+
         try:
             options = Options()
             options.headless = True
             self.driver = webdriver.Chrome(
-                executable_path="chromedriver.exe", options=options)
+                executable_path=resource_path("chromedriver.exe"), options=options)
             result = ResultType.DEFFAUT
             self.driver.get(link)
             print("getting: " + link)

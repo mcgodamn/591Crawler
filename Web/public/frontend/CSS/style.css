@@ -30,8 +30,8 @@ body {
 
 .result-background {
     background-color: var(--result-bg-color);
-    color: white;
 }
+
 
 .blacklist-background {
     background-color: var(--blacklist-bg-color);
@@ -47,4 +47,8 @@ body {
 .btn-primary:active:hover {
     background-color: var(--result-bg-color);
     border-color: var(--result-bg-color);
+}
+
+a {
+    color: rgb(181, 233, 255);
 }

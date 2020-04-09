@@ -48,6 +48,7 @@ var vm = new Vue({
                 }
                 else {
                     $('#ProgressModal').modal('hide')
+                    vm.resultShow = true
                 }
             }
         },

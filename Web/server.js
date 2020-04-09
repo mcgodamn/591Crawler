@@ -1,13 +1,29 @@
 var express = require("express")
 var app = express()
 var http = require('http')
-app.use(express.static(__dirname + '/public'));
+var child_process = require('child_process')
+var path = require('path')
+const fs = require('fs')
+
+app.use(express.static(path.join(__dirname, 'Public')));
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/public/frontend/index.html');
+    res.sendFile(path.join(__dirname, 'Public/frontend/index.html'));
 })
 
 var server = http.createServer(app).listen(3000)
 var server_socket = require('socket.io')(server)
+
+var url = 'http://localhost:3000';
+var start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
+child_process.exec(start + ' ' + url);
+
+var p = path.join(process.cwd(), 'bin/crawler.exe')
+console.log(p)
+child_process.execFile(p, function (error, stdout, stderr) {
+    if (error) {
+        console.log(error);
+    }
+});
 
 server_socket.on('connection', function (socket) {
     socket.on('whoamI', function (data) {
