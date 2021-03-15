@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="./progress.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+  <script>
+    $(function () {
+
+      $(".progress").each(function () {
+
+        var value = $(this).attr('data-value');
+        var left = $(this).find('.progress-left .progress-bar');
+        var right = $(this).find('.progress-right .progress-bar');
+
+        if (value > 0) {
+          if (value <= 50) {
+            right.css('transform', 'rotate(' + percentageToDegrees(value) + 'deg)')
+          } else {
+            right.css('transform', 'rotate(180deg)')
+            left.css('transform', 'rotate(' + percentageToDegrees(value - 50) + 'deg)')
+          }
+        }
+      })
+
+      function percentageToDegrees(percentage) {
+        return percentage / 100 * 360
+      }
+    });
+  </script>
+</head>
+
+<body>
+
+  <div class="container py-5">
+          <!-- Progress bar 1 -->
+          <div class="progress mx-auto" data-value='10'>
+            <span class="progress-left">
+              <span class="progress-bar border-primary"></span>
+            </span>
+            <span class="progress-right">
+              <span class="progress-bar border-primary"></span>
+            </span>
+            <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
+              <div class="h2 font-weight-bold">80<sup class="small">%</sup></div>
+            </div>
+          </div>
+          <!-- END -->
+  </div>
+
+</body>
+
+</html>

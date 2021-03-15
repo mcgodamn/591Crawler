@@ -1,0 +1,102 @@
+<!--
+@File   : index.html
+@Author : McGodamn
+@Date   : 2020/3/16 上午12:11:53
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="591租屋超級屌炸加強版">
+    <meta name="author" content="McGodamn">
+    <link rel="shortcut icon" href="#" />
+
+    <!-- font awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" rel="stylesheet">
+    <!-- google font -->
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+    <!-- vue development version -->
+    <script src="https://unpkg.com/vue"></script>
+    <!-- vue production version -->
+    <!-- <script src="https://unpkg.com/vue@2.6.0/dist/vue.min.js"></script> -->
+    <!-- vue http request lib -->
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+    <!-- socket.io -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    <link rel="stylesheet" href="frontend/CSS/style.css">
+    <link rel="stylesheet" href="frontend/CSS/progress_circle.css">
+    <!-- <link rel="stylesheet" href="./CSS/style.css">
+    <link rel="stylesheet" href="./CSS/progress_circle.css"> -->
+    <!-- self-define -->
+    <script type="module" src="frontend/Scripts/main.js"></script>
+    <!-- <script type="module" src="./Scripts/main.js"></script> -->
+    <!-- minified -->
+    <title>真·591租屋搜尋器</title>
+</head>
+
+<body>
+    <div id="app">
+        <div class="option-background" v-show="optionShow">
+            <div class="container pr-5 pl-5 pt-5">
+                <h1><b>591租屋搜尋器</b></h1>
+                <div class="row">
+                    <form class="pt-3 col" v-html="getOptionPageHtml()"></form>
+                </div>
+                <div class="row text-center mt-1 pb-4">
+                    <div class="col">
+                        <button v-on:click="StartCrawler" type="button" class="btn btn-primary">搜尋</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-background" v-show="resultShow">
+            <div class="container pt-5">
+                <table class="table" style="color:white;">
+                    <thead>
+                        <tr v-html="getTableHeaderHtml()"></tr>
+                    </thead>
+                    <tbody v-html="getTableDataHtml()"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="ProgressModal" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content" v-show="modalShow">
+                    <div class="modal-header">
+                        <h4 class="modal-title mx-auto">正在駭入591獲取資料...</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="progress mx-auto" :data-value="Math.round((progress.now/progress.all)*100)">
+                            <span class="progress-left">
+                                <span class="progress-bar border-primary"></span>
+                            </span>
+                            <span class="progress-right">
+                                <span class="progress-bar border-primary"></span>
+                            </span>
+                            <div
+                                class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
+                                <div class="h2 font-weight-bold">{{Math.round((progress.now/progress.all)*100)}}<sup
+                                        class="small">%</sup></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button v-on:click="CancelCrawler" type="button" class="btn btn-danger mx-auto">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
