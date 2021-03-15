@@ -123,8 +123,9 @@ class Crawler():
         try:
             options = Options()
             options.headless = True
+            print(os.getcwd())
             self.driver = webdriver.Chrome(
-                executable_path=resource_path("chromedriver.exe"), options=options)
+                executable_path=resource_path(".\chromedriver.exe"), options=options)
             result = ResultType.DEFFAUT
             self.driver.get(link)
             print("getting: " + link)
