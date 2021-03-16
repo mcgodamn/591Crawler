@@ -74,7 +74,7 @@
                 <!-- Modal content-->
                 <div class="modal-content" v-show="modalShow">
                     <div class="modal-header">
-                        <h4 class="modal-title mx-auto">正在駭入591獲取資料...</h4>
+                        <h4 class="modal-title mx-auto" v-text="progressText"></h4>
                     </div>
                     <div class="modal-body">
                         <div class="progress mx-auto" :data-value="Math.round((progress.now/progress.all)*100)">

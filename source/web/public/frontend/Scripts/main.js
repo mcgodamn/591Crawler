@@ -1,6 +1,7 @@
 import {
     TYPE,
-    PARAMETERS
+    PARAMETERS,
+    STRING
 } from './data.js'
 
 startSocket()
@@ -8,6 +9,7 @@ startSocket()
 var vm = new Vue({
     el: '#app',
     data: {
+        progressText: "",
         optionShow: true,
         resultShow: false,
         modalShow:false,
@@ -66,12 +68,14 @@ var vm = new Vue({
         },
         StartCrawler() {
             var parameters = getParameters()
-            console.log(parameters)
             if (this.state.isCrawling) return
             this.state.isCrawling = true
+            vm.progressText = STRING.progresing
+            updateProgressCircle(0)
             socket.emit("command",
                 {
-                    type: "start_crawler", args:parameters
+                    type: "start_crawler",
+                    args:parameters
                 },
                 function () {
                     console.log("start now yo")
@@ -79,6 +83,16 @@ var vm = new Vue({
             )
         },
         CancelCrawler() {
+            vm.progressText = STRING.canceling
+            socket.emit("command",
+                {
+                    type: "cancel_crawler",
+                    args: null
+                },
+                function () {
+                    console.log("cancel yo")
+                }
+            )
         },
         getTableHeaderHtml() {
             var str = `<th scope="col">#</th>`
@@ -109,7 +123,7 @@ var vm = new Vue({
 
 function handleData(data) {
     console.log(data)
-    if (data.length == 0) { return }
+    if (data == null || data.length == 0) { return }
     var result = data[0]
     var head = []
     for (var first_key in result) {
@@ -118,6 +132,7 @@ function handleData(data) {
         }
         break
     }
+
     vm.crawl_result_header = head
     vm.crawl_result = result
 }
@@ -321,7 +336,7 @@ function updateProgressCircle(value) {
         var left = $(this).find('.progress-left .progress-bar');
         var right = $(this).find('.progress-right .progress-bar');
 
-        if (value > 0) {
+        if (value >= 0) {
             if (value <= 50) {
                 right.css('transform', 'rotate(' + percentageToDegrees(value) + 'deg)')
             } else {

@@ -11,10 +11,13 @@ def onEvent(event, *args):
         socketIO.emit('progress', args)
 
 def onNodeCommand(_parameters):
+    print(_parameters)
     if _parameters['type'] == "database":
         m_crawler.output()
     elif _parameters['type'] == "start_crawler":
         m_crawler.Start(_parameters['args'])
+    elif _parameters['type'] == "cancel_crawler":
+        m_crawler.Stop()
 
 m_crawler = crawler.Crawler()
 m_crawler.setEventDelegate(onEvent)

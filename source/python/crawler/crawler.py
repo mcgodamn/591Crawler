@@ -12,6 +12,7 @@ from enum import IntEnum
 import json
 import sys
 import os
+import threading
 
 URL_HEAD = "https://rent.591.com.tw/?"
 
@@ -25,6 +26,7 @@ class ResultType(IntEnum):
 class Crawler():
 
     def __init__(self):
+        self.start = False
         self.Data = []
         self.driver = None
         self.distance = [0,0]
@@ -215,15 +217,32 @@ class Crawler():
         #     self.driver.quit()
 
     def Start(self, _parameters):
-        print(_parameters)
+        if not self.start:
+            self.start = True
+            threading.Thread(target=self.startCrawler, args=(_parameters,)).start()
+    
+    def startCrawler(self, _parameters):
+        self.stop = False
         datas = self.ProcessParameter(_parameters)
-        print(datas)
-        self.eventDelegate("progress", {'progressAll':len(datas)})
+        self.eventDelegate("progress", {'progressAll': len(datas)})
         for i in range(len(datas)):
+            if self.stop:
+                break
             self.goods(datas[i])
             self.eventDelegate("progress", {'progress': i+1})
+
+        self.start = False
         print("crawler finished")
-        self.output()
+        if self.stop:
+            self.eventDelegate("finish")
+        else:
+            self.output()
+
+    def Stop(self):
+        def stop():
+            self.stop = True
+            print("cancel_crawler")
+        threading.Thread(target=stop).start()
 
 # c = Crawler()
 # c.Start({'kind': [2, 3], 'sex': [1, 3], 'not_cover': 1, 'rentprice': [6000, 8000], 'mrtcoods': [

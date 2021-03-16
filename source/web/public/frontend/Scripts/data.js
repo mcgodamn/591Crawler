@@ -4,6 +4,11 @@ export const TYPE = {
     TWO_LEVEL_OPTIONS: 2,
 }
 
+export const STRING = {
+    progresing: "正在駭入591獲取資料...",
+    canceling: "正在取消..."
+}
+
 export const PARAMETERS = [
     {
         name: "kind",

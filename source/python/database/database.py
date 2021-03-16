@@ -4,6 +4,8 @@ FILE_NAME = 'database/database.json'
 
 NO_OUTPUT = True
 
+CLEAR_START = True
+
 class Database():
     def __init__(self):
         self.m_database = {}
@@ -31,6 +33,9 @@ class Database():
 
         if not self.hasLoad:
             self.loadDB()
+        
+        if CLEAR_START:
+            self.m_database = {}
 
         for data in _allData:
             if data['url'] in self.m_database:

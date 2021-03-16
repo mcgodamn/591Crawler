@@ -17,13 +17,13 @@ var url = 'http://localhost:3000';
 var start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
 child_process.exec(start + ' ' + url);
 
-var p = path.join(process.cwd(), 'bin/crawler.exe')
-console.log(p)
-child_process.execFile(p, function (error, stdout, stderr) {
-    if (error) {
-        console.log(error);
-    }
-});
+// var p = path.join(process.cwd(), 'bin/crawler.exe')
+// console.log(p)
+// child_process.execFile(p, function (error, stdout, stderr) {
+//     if (error) {
+//         console.log(error);
+//     }
+// });
 
 server_socket.on('connection', function (socket) {
     socket.on('whoamI', function (data) {
@@ -47,13 +47,12 @@ function SetClientSocket(socket)
     clientSocket = socket
 
     socket.on('command', function (data,callback) {
-        console.log(data.type)
+        console.log(data)
         switch(data.type)
         {
+            case 'cancel_crawler':
             case 'start_crawler':
                 crawlerSocket.emit("command", { type: data.type, args: data.args})
-                break
-            case 'cancel_crawler':
                 break
         }
         callback()
