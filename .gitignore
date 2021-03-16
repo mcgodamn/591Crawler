@@ -1,4 +1,5 @@
 *.pyc
+*.spec
 __pycache__
 Build
 Build.*
