@@ -30,6 +30,7 @@ class Crawler():
         self.Data = []
         self.driver = None
         self.distance = [0,0]
+        self.rootPath = "//div[@id=\"content\"]"
 
     def setDatabase(self, _db):
         self.database = _db
@@ -114,57 +115,49 @@ class Crawler():
                 return result
         return [{'url': PathBuilder(para), 'addon': getAddonData()}]
 
-
-    # 取得網頁內容
-    def getContent(self, link, examPath, waitTime=1):
+    def openBrowser(self, link, waitTime=1):
         def resource_path(relative_path):
             if hasattr(sys, '_MEIPASS'):
                 return os.path.join(sys._MEIPASS, relative_path)
             return os.path.join(os.path.abspath("."), relative_path)
-
+        options = Options()
+        options.headless = True
+        self.driver = webdriver.Chrome(
+            executable_path=resource_path(".\chromedriver.exe"), options=options)
+        result = ResultType.DEFFAUT
+        self.driver.get(link)
+        print("getting: " + link)
         try:
-            options = Options()
-            options.headless = True
-            print(os.getcwd())
-            self.driver = webdriver.Chrome(
-                executable_path=resource_path(".\chromedriver.exe"), options=options)
-            result = ResultType.DEFFAUT
-            self.driver.get(link)
-            print("getting: " + link)
-
-            while self.driver.execute_script("return document.readyState") != 'complete':
-                time.sleep(0.5)
-
-            loading = self.driver.find_element_by_id("j_loading")
-            WebDriverWait(self.driver, 5).until(
-                (lambda d:
-                    EC.presence_of_element_located(
-                        (By.XPATH, examPath))(d) and loading.value_of_css_property("display") == 'none')
-            )
-
+            self.waitForLoading(waitTime)
             return ResultType.SUCCESS
         except Exception as e:
             print(e)
             if ("HTTP ERROR" in self.driver.page_source):
                 if waitTime < 180:
-                    print("HTTP ERROR, retey")
+                    print("HTTP ERROR, retry")
                     self.driver.quit()
                     time.sleep(waitTime)
-                    return self.getContent(link, examPath, waitTime * 2)
-                else:
-                    return ResultType.TIMEOUT
-            else:
-                return ResultType.FAIL
+                    return self.openBrowser(link, waitTime * 2)
+            return ResultType.FAIL
 
-    def goods(self, data, re=False):
+    # 取得網頁內容
+    def waitForLoading(self, waitTime=1):
+        while self.driver.execute_script("return document.readyState") != 'complete':
+            time.sleep(0.5)
+
+        loading = self.driver.find_element_by_id("j_loading")
+        WebDriverWait(self.driver, 5).until(
+            (lambda d:
+                EC.presence_of_element_located(
+                    (By.XPATH, self.rootPath))(d) and loading.value_of_css_property("display") == 'none')
+        )
+
+    def goods(self, data, page = 0):
         def AnalysisRoom(ele):
             result = {}
             roomEl = ele.find_element_by_class_name("infoContent")
             result['price'] = float(ele.find_element_by_class_name(
                 "price").find_element_by_tag_name("i").text.replace(',', ''))
-            print(roomEl.find_element_by_class_name("nearby").text)
-            print(float(roomEl.find_element_by_class_name(
-                "nearby").text.split()[2][:-1]))
             result['dist'] = float(roomEl.find_element_by_class_name(
                 "nearby").text.split()[2][:-1])
 
@@ -182,39 +175,29 @@ class Crawler():
             maxDis = float('inf') if (
                 self.distance[1] == "") else float(self.distance[1])
 
-            print(minDis)
-            print(maxDis)
-
             return result if (result['dist'] <= maxDis) and (minDis <= result['dist']) else None
-        # try:
-        canWeGoNextPage = True
-        result = self.getContent(data['url'], "//div[@id=\"content\"]")
-        el = self.driver.find_element_by_xpath("//div[@id=\"content\"]")
+
+        self.openBrowser(data['url'] + f"&firstRow={page * 30}")
+        el = self.driver.find_element_by_xpath(self.rootPath)
         if el.value_of_css_property("display") == 'none':
             self.driver.quit()
             return
 
+        canWeGoNextPage = False
         els = el.find_elements_by_xpath(
             "//ul[contains(@class, 'listInfo') and contains(@class, 'clearfix')]")
         for room in els:
             res = AnalysisRoom(room)
             if res != None:
+                canWeGoNextPage = True
                 res.update(data['addon'])
                 self.Data.append(res)
             else:
                 canWeGoNextPage = False
                 break
         self.driver.quit()
-
-        # TODO handle next page
-
-        # except (TypeError, AttributeError) as te:
-        #     print(te)
-        #     self.driver.quit()
-        #     self.goods(data, True)
-        # except Exception as e:
-        #     print(e)
-        #     self.driver.quit()
+        if canWeGoNextPage:
+            self.goods(data, page + 1)
 
     def Start(self, _parameters):
         if not self.start:

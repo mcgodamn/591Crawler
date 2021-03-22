@@ -339,6 +339,7 @@ function updateProgressCircle(value) {
         if (value >= 0) {
             if (value <= 50) {
                 right.css('transform', 'rotate(' + percentageToDegrees(value) + 'deg)')
+                left.css('transform', 'rotate(' + percentageToDegrees(0) + 'deg)')
             } else {
                 right.css('transform', 'rotate(180deg)')
                 left.css('transform', 'rotate(' + percentageToDegrees(value - 50) + 'deg)')
