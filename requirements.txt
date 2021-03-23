@@ -1,0 +1,3 @@
+selenium
+socketIO_client_nexus
+pyinstaller
