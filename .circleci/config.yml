@@ -10,7 +10,7 @@ jobs:
       - checkout
       - run:
           name: "Install dependency"
-          command: pip install -r "./requirements.txt" & npm install --save-dev -g pkg
+          command: pip install -r ./requirements.txt & npm install -g pkg
       - run:
           name: "Run Build step"
           command: .\build_win.bat
