@@ -5,7 +5,7 @@ jobs:
   build:
     executor:
       name: win/default
-      shell: powershell.exe
+      shell: cmd.exe
     steps:
       - checkout
       - run:
