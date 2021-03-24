@@ -1,5 +1,3 @@
-pip install -r "./requirements.txt"
-npm install --save-dev -g pkg
 rmdir /s /q "./Build"
 mkdir "./Build"
 cd "./Build"
