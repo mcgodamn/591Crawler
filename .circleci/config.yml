@@ -1,0 +1,18 @@
+version: 2.1
+orbs:
+  win: circleci/windows@2.2.0
+jobs:
+  build:
+    executor:
+      name: win/default
+      shell: powershell.exe
+    steps:
+      - checkout
+      - run:
+          name: "Run Build step"
+          command: .\build_win.bat
+      - run:
+          name: "Test the executable"
+          command: .\Build\591crawler.exe
+      - store_artifacts:
+          path: .\Build\
