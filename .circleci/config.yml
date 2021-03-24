@@ -14,8 +14,5 @@ jobs:
       - run:
           name: "Run Build step"
           command: .\build_win.bat
-      - run:
-          name: "Test the executable"
-          command: .\Build\591crawler.exe
       - store_artifacts:
           path: .\Build\
