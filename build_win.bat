@@ -1,3 +1,4 @@
+pip install -r "./requirements.txt"
 rmdir /s /q "Build"
 mkdir "Build"
 cd "./Build"

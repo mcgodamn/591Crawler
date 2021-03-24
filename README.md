@@ -20,6 +20,6 @@ And run `pip install -r requirements.txt` at this project's root folder first.
 
 建置請執行 `build_win.bat`。
 
-並確保你已經安裝了 `python 3`, `nodeJS`。
+請先確保你已經安裝了 `python 3`, `nodeJS`。
 
-並在專案根目錄上用cmd 運行 `pip install -r requirements.txt`。
+並先在專案根目錄上用cmd 運行 `pip install -r requirements.txt`。
