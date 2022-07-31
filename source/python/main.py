@@ -18,11 +18,13 @@ def onNodeCommand(_parameters):
         m_crawler.Start(_parameters['args'])
     elif _parameters['type'] == "cancel_crawler":
         m_crawler.Stop()
-
+def onNodeInit(_parameters):
+    m_crawler.Init(_parameters['chromedriverPath'])
 m_crawler = crawler.Crawler()
 m_crawler.setEventDelegate(onEvent)
 m_crawler.setDatabase(database.Database())
 socketIO = SocketIO('127.0.0.1', 3000, LoggingNamespace)
 socketIO.on('command', onNodeCommand)
+socketIO.on('init', onNodeInit)
 socketIO.emit("whoamI", "crawler")
 socketIO.wait()

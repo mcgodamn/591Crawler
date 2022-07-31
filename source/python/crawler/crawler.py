@@ -31,6 +31,10 @@ class Crawler():
         self.driver = None
         self.distance = [0,0]
         self.rootPath = "//div[@id=\"content\"]"
+    
+    def Init(self, _chromedriverPath):
+        print(f"set chromedriverPath to {_chromedriverPath}")
+        self.chromedriverPath = _chromedriverPath
 
     def setDatabase(self, _db):
         self.database = _db
@@ -123,7 +127,7 @@ class Crawler():
         options = Options()
         options.headless = True
         self.driver = webdriver.Chrome(
-            executable_path=resource_path(".\chromedriver.exe"), options=options)
+            executable_path=self.chromedriverPath, options=options)
         result = ResultType.DEFFAUT
         self.driver.get(link)
         print("getting: " + link)
