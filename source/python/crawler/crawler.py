@@ -226,7 +226,3 @@ class Crawler():
             self.stop = True
             print("cancel_crawler")
         threading.Thread(target=stop).start()
-
-# c = Crawler()
-# c.Start({'kind': [2, 3], 'sex': [1, 3], 'not_cover': 1, 'rentprice': [6000, 8000], 'mrtcoods': [
-#         4232, 4231, 4184], 'order': 'nearby', 'orderType': 'desc', 'option': ['broadband'], 'hasimg': 1, 'area': [6]})

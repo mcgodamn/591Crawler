@@ -5,14 +5,17 @@ jobs:
   build:
     executor:
       name: win/default
-      shell: cmd.exe
+      shell: powershell.exe
     steps:
       - checkout
       - run:
           name: "Install dependency"
-          command: pip install -r ./requirements.txt & npm install -g pkg
+          command: pip install -r ./requirements.txt; npm install -g pkg
       - run:
           name: "Run Build step"
-          command: .\build_win.bat
+          command: .\build_win.ps1
+      - run:
+          name: "Compress build files"
+          command: Compress-Archive -Path "./Build/*" "Build.zip"
       - store_artifacts:
-          path: .\Build\
+          path: .\Build.zip
