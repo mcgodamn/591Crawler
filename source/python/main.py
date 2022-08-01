@@ -1,16 +1,26 @@
 from datetime import datetime
-from socketIO_client_nexus import SocketIO, LoggingNamespace
 import crawler.crawler as crawler
 import database.database as database
-
+import socketio
 
 def onEvent(event, *args):
     if event == 'finish':
-        socketIO.emit('finish', args)
+        m_socket.emit('finish', args)
     elif event == 'progress':
-        socketIO.emit('progress', args)
+        m_socket.emit('progress', args)
+m_crawler = crawler.Crawler()
+m_crawler.setEventDelegate(onEvent)
+m_crawler.setDatabase(database.Database())
 
-def onNodeCommand(_parameters):
+m_socket = socketio.Client()
+m_socket.connect('http://localhost:3000')
+
+@m_socket.event
+def init(_parameters):
+    m_crawler.Init(_parameters['chromedriverPath'])
+
+@m_socket.event
+def command(_parameters):
     print(_parameters)
     if _parameters['type'] == "database":
         m_crawler.output()
@@ -18,13 +28,6 @@ def onNodeCommand(_parameters):
         m_crawler.Start(_parameters['args'])
     elif _parameters['type'] == "cancel_crawler":
         m_crawler.Stop()
-def onNodeInit(_parameters):
-    m_crawler.Init(_parameters['chromedriverPath'])
-m_crawler = crawler.Crawler()
-m_crawler.setEventDelegate(onEvent)
-m_crawler.setDatabase(database.Database())
-socketIO = SocketIO('127.0.0.1', 3000, LoggingNamespace)
-socketIO.on('command', onNodeCommand)
-socketIO.on('init', onNodeInit)
-socketIO.emit("whoamI", "crawler")
-socketIO.wait()
+
+m_socket.emit("whoamI", "crawler")
+m_socket.wait()
