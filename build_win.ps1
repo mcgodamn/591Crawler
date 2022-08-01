@@ -1,3 +1,8 @@
+pip install -r ./requirements.txt
+npm install -g pkg
+cd .\source\web
+npm install
+cd ..\..
 rm -Recurse "./Build"
 md "./Build"
 cd "./Build"
