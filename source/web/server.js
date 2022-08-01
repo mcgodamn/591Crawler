@@ -3,7 +3,6 @@ var app = express()
 var http = require('http')
 var child_process = require('child_process')
 var path = require('path')
-var chromedriver = require('chromedriver');
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', function (req, res) {
@@ -34,17 +33,22 @@ server.listen(3000, () => {
     console.log('listening on *:3000');
 });
 
+crawlerPath = 
+    // 'python ' + path.join(process.cwd(), '../python/main.py');
+    path.join(process.cwd(), 'bin/crawler.exe');
+console.log(crawlerPath)
+child_process.exec(crawlerPath, (error, stdout, stderr)=> {
+    if (error) {
+        console.log(error);
+    }
+    if (stdout) {
+        console.log(stdout);
+    }
+})
+
 var url = 'http://localhost:3000';
 var start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
 child_process.exec(start + ' ' + url);
-
-// var p = path.join(process.cwd(), 'bin/crawler.exe')
-// console.log(p)
-// child_process.execFile(p, function (error, stdout, stderr) {
-//     if (error) {
-//         console.log(error);
-//     }
-// });
 
 function SetClientSocket(socket)
 {
@@ -66,13 +70,15 @@ function SetClientSocket(socket)
 
 function SetCrawlerSocket(socket)
 {
-    console.log("Hello crawler")
+    console.log("Hello crawler ")
     crawlerSocket = socket
-    crawlerSocket.emit("init", {chromedriverPath: chromedriver.path})
     socket.on('finish', function (data) {
         clientSocket.emit("crawler_result",data)
     })
     socket.on('progress', function (data) {
         clientSocket.emit("crawler_progress", data)
+    })
+    socket.on('log', function (data) {
+        console.log("crawler log: " + data)
     })
 }

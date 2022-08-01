@@ -3,15 +3,11 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import UnexpectedAlertPresentException
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 from datetime import datetime
-import queue
 from enum import IntEnum
-import json
-import sys
-import os
 import threading
 
 URL_HEAD = "https://rent.591.com.tw/?"
@@ -30,11 +26,10 @@ class Crawler():
         self.Data = []
         self.driver = None
         self.distance = [0,0]
-        self.rootPath = "//div[@id=\"content\"]"
+        self.rootPath = "//div[@class=\"list-container-content\"]"
     
-    def Init(self, _chromedriverPath):
-        print(f"set chromedriverPath to {_chromedriverPath}")
-        self.chromedriverPath = _chromedriverPath
+    def log(self, msg):
+        self.eventDelegate("log", msg)
 
     def setDatabase(self, _db):
         self.database = _db
@@ -99,6 +94,7 @@ class Crawler():
                     para["option"].remove(extra)
 
         def addStaticInfo():
+            para["searchtype"] = 4
             para["order"] = "nearby"
             para["orderType"] = "desc"
 
@@ -118,19 +114,25 @@ class Crawler():
                     result += self.ProcessParameter(newPara)
                 return result
         return [{'url': PathBuilder(para), 'addon': getAddonData()}]
+    
+    def find_element(self, baseEle, by, pattern):
+        WebDriverWait(self.driver, 5).until(
+            EC.presence_of_element_located((by, pattern)))
+        return baseEle.find_element(by, pattern)
+    
+    def find_elements(self, baseEle, by, pattern):
+        WebDriverWait(self.driver, 5).until(
+            EC.presence_of_element_located((by, pattern)))
+        return baseEle.find_elements(by, pattern)
 
     def openBrowser(self, link, waitTime=1):
-        def resource_path(relative_path):
-            if hasattr(sys, '_MEIPASS'):
-                return os.path.join(sys._MEIPASS, relative_path)
-            return os.path.join(os.path.abspath("."), relative_path)
         options = Options()
         options.headless = True
         self.driver = webdriver.Chrome(
-            executable_path=self.chromedriverPath, options=options)
+            executable_path=ChromeDriverManager().install(), options=options)
         result = ResultType.DEFFAUT
         self.driver.get(link)
-        print("getting: " + link)
+        self.log("getting: " + link)
         try:
             self.waitForLoading(waitTime)
             return ResultType.SUCCESS
@@ -149,49 +151,42 @@ class Crawler():
         while self.driver.execute_script("return document.readyState") != 'complete':
             time.sleep(0.5)
 
-        loading = self.driver.find_element_by_id("j_loading")
+        loading = self.driver.find_element(By.ID, "j-loading")
         WebDriverWait(self.driver, 5).until(
             (lambda d:
-                EC.presence_of_element_located(
-                    (By.XPATH, self.rootPath))(d) and loading.value_of_css_property("display") == 'none')
+                EC.presence_of_element_located((By.XPATH, self.rootPath))(d)
+                and loading.value_of_css_property("display") == 'none')
         )
 
     def goods(self, data, page = 0):
-        def AnalysisRoom(ele):
+        def analysisRoom(ele):
             result = {}
-            roomEl = ele.find_element_by_class_name("infoContent")
-            result['price'] = float(ele.find_element_by_class_name(
-                "price").find_element_by_tag_name("i").text.replace(',', ''))
-            result['dist'] = float(roomEl.find_element_by_class_name(
-                "nearby").text.split()[2][:-1])
-
-            titleAndUrl = roomEl.find_element_by_tag_name(
-                "h3").find_element_by_tag_name("a")
-            result['title'] = titleAndUrl.text
-            result['url'] = titleAndUrl.get_attribute('href')
-
-            allArea = roomEl.find_element_by_class_name(
-                "lightBox").text
-            areaPos = allArea.find('坪')
-            result['area'] = float(allArea[:areaPos].split('  |  ')[-1])
-
+            result['url'] = self.find_element(ele, By.TAG_NAME, 'a').get_attribute('href')
+            roomEl = self.find_element(ele, By.CLASS_NAME, "rent-item-right")
+            result['price'] = float(self.find_element(roomEl, By.CLASS_NAME,"item-price-text").find_element(By.TAG_NAME,"span").text.replace(',', ''))
+            dist = self.find_element(roomEl, By.CLASS_NAME, "item-tip").text
+            result['dist'] = float(dist.split()[-1][:-2])
+            result['title'] = self.find_element(roomEl, By.CLASS_NAME, "item-title").text
+            result['area'] = self.find_element(roomEl, By.CLASS_NAME, "item-style").find_elements(By.TAG_NAME, "li")[1].text
+            
             minDis = 0 if (self.distance[0] == "") else float(self.distance[0])
             maxDis = float('inf') if (
-                self.distance[1] == "") else float(self.distance[1])
+                self.distance[1] == "" or self.distance[1] == 0) else float(self.distance[1])
+            
+            isPass = (result['dist'] <= maxDis) and (minDis <= result['dist'])
 
-            return result if (result['dist'] <= maxDis) and (minDis <= result['dist']) else None
+            return result if isPass else None
 
         self.openBrowser(data['url'] + f"&firstRow={page * 30}")
-        el = self.driver.find_element_by_xpath(self.rootPath)
+        el = self.driver.find_element(By.XPATH, self.rootPath)
         if el.value_of_css_property("display") == 'none':
             self.driver.quit()
             return
 
         canWeGoNextPage = False
-        els = el.find_elements_by_xpath(
-            "//ul[contains(@class, 'listInfo') and contains(@class, 'clearfix')]")
+        els = self.find_elements(el, By.XPATH, "//section[@class=\"vue-list-rent-item\"]")
         for room in els:
-            res = AnalysisRoom(room)
+            res = analysisRoom(room)
             if res != None:
                 canWeGoNextPage = True
                 res.update(data['addon'])
@@ -201,6 +196,7 @@ class Crawler():
                 break
         self.driver.quit()
         if canWeGoNextPage:
+            self.log("GO NEXT PAGE")
             self.goods(data, page + 1)
 
     def Start(self, _parameters):
@@ -209,24 +205,28 @@ class Crawler():
             threading.Thread(target=self.startCrawler, args=(_parameters,)).start()
     
     def startCrawler(self, _parameters):
-        self.stop = False
-        datas = self.ProcessParameter(_parameters)
-        self.eventDelegate("progress", {'progressAll': len(datas)})
-        for i in range(len(datas)):
-            if self.stop:
-                break
-            self.goods(datas[i])
-            self.eventDelegate("progress", {'progress': i+1})
+        try:
+            self.log("crawler started")
+            self.stop = False
+            datas = self.ProcessParameter(_parameters)
+            self.eventDelegate("progress", {'progressAll': len(datas)})
+            for i in range(len(datas)):
+                if self.stop:
+                    break
+                self.goods(datas[i])
+                self.eventDelegate("progress", {'progress': i+1})
 
-        self.start = False
-        print("crawler finished")
-        if self.stop:
-            self.eventDelegate("finish")
-        else:
-            self.output()
+            self.start = False
+            self.log("crawler finished")
+            if self.stop:
+                self.eventDelegate("finish")
+            else:
+                self.output()
+        except Exception as e:
+            self.log(f"Error: {str(e)}")
 
     def Stop(self):
         def stop():
             self.stop = True
-            print("cancel_crawler")
+            self.log("cancel_crawler")
         threading.Thread(target=stop).start()

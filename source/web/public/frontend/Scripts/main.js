@@ -54,8 +54,7 @@ var vm = new Vue({
                 }
             }
         },
-        crawl_result: {
-        },
+        crawl_result: {test:'fuck'},
         crawl_result_header: [],
     },
     methods: {
@@ -124,17 +123,16 @@ var vm = new Vue({
 function handleData(data) {
     console.log(data)
     if (data == null || data.length == 0) { return }
-    var result = data[0]
     var head = []
-    for (var first_key in result) {
-        for (var key in result[first_key]) {
+    for (var first_key in data) {
+        for (var key in data[first_key]) {
             head.push(key)
         }
         break
     }
 
     vm.crawl_result_header = head
-    vm.crawl_result = result
+    vm.crawl_result = data
 }
 
 function getDataHtml(_para) {
@@ -163,10 +161,22 @@ function startSocket() {
     socket = io('http://localhost:3000');
     socket.on('connect', function () {
         socket.emit('whoamI', "client")
+        // //Debug
+        // socket.emit("command",
+        // {
+        //     type: "start_crawler",
+        //     args: {
+        //         kind: [ '1' ],
+        //         sex: [ '1' ],
+        //         distance: [ '', '1000' ],
+        //         patternMore: [ '1' ],
+        //         rentprice: [ '', '15000' ],
+        //         mrtcoods: [ '4234' ]
+        //     }
+        // })
     });
-    socket.on('crawler_progress', function (data) {
+    socket.on('crawler_progress', function (res) {
         vm.modalShow = true
-        var res = data[0]
         if (res.progressAll === undefined) {
             vm.progress.now = res.progress
         } else {

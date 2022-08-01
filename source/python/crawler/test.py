@@ -15,11 +15,12 @@ test_args = {
     "distance": [ 0, 500 ]
 }
 
-# def resource_path(relative_path):
-#     if hasattr(sys, '_MEIPASS'):
-#         return os.path.join(sys._MEIPASS, relative_path)
-#     return os.path.join(os.path.abspath("."), relative_path)
-# print(resource_path("chromedriver.exe"))
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
+chromedriverPath = resource_path(r"source\web\node_modules\chromedriver\lib\chromedriver\chromedriver.exe")
 m_crawler = crawler.Crawler()
 m_crawler.setEventDelegate(lambda e, *arg: print(e))
+m_crawler.Init(chromedriverPath)
 m_crawler.startCrawler(test_args)
