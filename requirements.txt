@@ -1,3 +1,5 @@
+wheel
 selenium
-socketIO_client_nexus
+python-socketio
 pyinstaller
+webdriver_manager
