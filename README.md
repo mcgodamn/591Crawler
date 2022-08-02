@@ -10,18 +10,14 @@ Find suitable rooms from 591, saving my fucking time.
 ### Windows
 double click `591crawler.exe`
 
-點擊 `591crawler.exe` 即可
+雙擊 `591crawler.exe` 即可
 
 ## Build 建置
 ### Windows
 Be sure you have installed `python 3`, `nodeJS`.
 
-And run `pip install -r requirements.txt`, `npm install -g pkg` at this project's root folder first.
-
-And execute `build_win.ps1`.
+Execute `build_win.ps1` to build.
 
 請先確保你已經安裝了 `python 3`, `nodeJS`。
 
-並先在專案根目錄上用cmd 運行 `pip install -r requirements.txt`, `npm install -g pkg`。
-
-建置請執行 `build_win.ps1`。
+並在專案根目錄上運行 `build_win.ps1`以建置。
