@@ -9,6 +9,7 @@ import time
 from datetime import datetime
 from enum import IntEnum
 import threading
+import traceback
 
 URL_HEAD = "https://rent.591.com.tw/?"
 
@@ -165,6 +166,7 @@ class Crawler():
             roomEl = self.find_element(ele, By.CLASS_NAME, "rent-item-right")
             result['price'] = float(self.find_element(roomEl, By.CLASS_NAME,"item-price-text").find_element(By.TAG_NAME,"span").text.replace(',', ''))
             dist = self.find_element(roomEl, By.CLASS_NAME, "item-tip").text
+            self.log(f"{dist}")
             result['dist'] = float(dist.split()[-1][:-2])
             result['title'] = self.find_element(roomEl, By.CLASS_NAME, "item-title").text
             result['area'] = self.find_element(roomEl, By.CLASS_NAME, "item-style").find_elements(By.TAG_NAME, "li")[1].text
@@ -223,7 +225,9 @@ class Crawler():
             else:
                 self.output()
         except Exception as e:
-            self.log(f"Error: {str(e)}")
+            self.log(f"Error: {str(e)}\n{traceback.format_exc()}")
+            self.eventDelegate("finish", {'error': {'exception break'}})
+            self.stop = True
 
     def Stop(self):
         def stop():

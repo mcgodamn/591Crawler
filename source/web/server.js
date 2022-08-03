@@ -34,8 +34,8 @@ server.listen(3000, () => {
 });
 
 crawlerPath = 
-    // 'python ' + path.join(process.cwd(), '../python/main.py');
-    path.join(process.cwd(), 'bin/crawler.exe');
+    'python ' + path.join(process.cwd(), '../python/main.py');
+    // path.join(process.cwd(), 'bin/crawler.exe');
 console.log(crawlerPath)
 child_process.exec(crawlerPath, (error, stdout, stderr)=> {
     if (error) {

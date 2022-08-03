@@ -185,7 +185,15 @@ function startSocket() {
     });
     socket.on('crawler_result', function (data) {
         vm.state.isCrawling = false
-        handleData(data)
+        if (data.error)
+        {
+            window.alert("有地方出錯了!");
+            console.log("stop crawler because " + data.error);
+        }
+        else
+        {
+            handleData(data)
+        }
     });
 }
 
